@@ -1,4 +1,5 @@
 import { createContext, useEffect } from "react";
+import { products as hardcodedProducts } from '../assets/assets'
 export const ShopContext = createContext();
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -96,19 +97,22 @@ const ShopContextProvider = (props) => {
     return totalAmount;
   };
 
-  const getProductsData = async () => {
-    try {
-      const response = await axios.get(backendUrl + "/api/product/list");
-      if (response.data.success) {
-        setProducts(response.data.products);
-      } else {
-        toast.error("Error fetching products");
-      }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error(error.message);
+const getProductsData = async () => {
+  try {
+    const response = await axios.get(backendUrl + "/api/product/list");
+    if (response.data.success) {
+      // Merge hardcoded + admin-added products
+      setProducts([...hardcodedProducts, ...response.data.products]);
+    } else {
+      toast.error("Error fetching products");
     }
-  };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    // Even if backend fails, show hardcoded products
+    setProducts(hardcodedProducts);
+    toast.error(error.message);
+  }
+};
 
   const getUserCart = async (token) => {
     try {
